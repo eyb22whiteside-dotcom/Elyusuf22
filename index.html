@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elyusuf Benyamin - Portfolio</title>
+    
+    <!-- Menggunakan Font Modern Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icon FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* VARIABEL WARNA (LIGHT & DARK MODE) */
+        :root {
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --btn-bg: #f9fafb;
+            --btn-hover: #e5e7eb;
+            --btn-border: #d1d5db;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #111827;
+            --bg-card: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --btn-bg: #374151;
+            --btn-hover: #4b5563;
+            --btn-border: #4b5563;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* RESET & DASAR */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background-color 0.4s ease;
+        }
+
+        /* CARD UTAMA */
+        .card {
+            background-color: var(--bg-card);
+            width: 100%;
+            max-width: 450px;
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: var(--shadow);
+            position: relative;
+            transition: background-color 0.4s ease, box-shadow 0.4s ease;
+            text-align: center;
+        }
+
+        /* TOMBOL DARK MODE */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: transform 0.3s;
+        }
+        .theme-toggle:hover { transform: rotate(20deg) scale(1.1); }
+
+        /* PROFIL TEKS */
+        .profile-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .profile-univ {
+            font-size: 0.95rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .profile-desc {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* TOMBOL UTAMA */
+        .btn-main {
+            display: inline-block;
+            width: 100%;
+            background-color: var(--accent);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-bottom: 25px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-main:hover { background-color: var(--accent-hover); transform: translateY(-2px); }
+
+        /* DAFTAR LINK */
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .link-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background-color: var(--btn-bg);
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 500;
+            border: 1px solid var(--btn-border);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .link-item:hover {
+            background-color: var(--btn-hover);
+            transform: translateY(-2px);
+        }
+        .link-item i { font-size: 1.2rem; }
+
+        /* FOOTER */
+        .footer {
+            margin-top: 35px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* MODAL INSTAGRAM */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .modal-content {
+            background-color: var(--bg-card);
+            width: 90%; max-width: 350px;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        
+        .close-modal {
+            position: absolute; top: 15px; right: 15px;
+            background: none; border: none; font-size: 1.2rem;
+            color: var(--text-secondary); cursor: pointer;
+        }
+        .modal-title { font-weight: 700; margin-bottom: 20px; color: var(--text-primary); }
+
+        /* TOMBOL SHARE KECIL */
+        .share-btn {
+            margin-top: 15px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .share-btn:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <!-- Tombol Toggle Tema -->
+        <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Ubah Tema">☀️</button>
+
+        <!-- Profil -->
+        <h1 class="profile-title">Elyusuf Benyamin</h1>
+        <p class="profile-univ"><i class="fa-solid fa-graduation-cap"></i> Universitas Lambung Mangkurat</p>
+        
+        <p class="profile-desc">
+            Halo Semua! Salam Kenal 👋<br><br>
+            Website ini sengaja aku buat sebagai ruang digital untuk kita saling terhubung. Buat teman-teman yang belum kenal dekat, yuk kita kenalan lebih jauh! Dan buat yang sudah kenal lama, kalian bisa kasih saran atau kritik agar kita bisa bertumbuh jadi lebih baik.
+        </p>
+
+        <!-- Masukan Form -->
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSd9wUDjOrbSmdpSRP-vwKldBBxLMBDAEX5YxNYam_DaPCAcaQ/viewform?usp=publish-editor" target="_blank" class="btn-main">
+            <i class="fa-solid fa-pen-to-square"></i> Kirim Masukan
+        </a>
+
+        <!-- Links Kontak -->
+        <div class="links-container">
+            <a href="https://drive.google.com/drive/folders/1_vClAahGKN3O4kcliUv_spWdt-08fYEg?usp=drive_link" target="_blank" class="link-item">
+                <i class="fa-regular fa-user" style="color: #6366f1;"></i> About me
+            </a>
+
+            <a href="https://wa.me/6281257061145" target="_blank" class="link-item">
+                <i class="fa-brands fa-whatsapp" style="color: #22c55e;"></i> WhatsApp
+            </a>
+
+            <!-- Tombol IG memicu Modal -->
+            <button onclick="openModal()" class="link-item">
+                <i class="fa-brands fa-instagram" style="color: #ec4899;"></i> Instagram
+            </button>
+
+            <a href="https://www.tiktok.com/@eyb.22?is_from_webapp=1&sender_device=pc" target="_blank" class="link-item">
+                <i class="fa-brands fa-tiktok"></i> TikTok
+            </a>
+        </div>
+
+        <!-- Fitur Impactful: Web Share API -->
+        <button onclick="shareProfile()" class="share-btn">
+            <i class="fa-solid fa-share-nodes"></i> Bagikan Profil Ini
+        </button>
+
+        <div class="footer">
+            Terima kasih sudah berkunjung yaaa, semoga kita menjadi teman yang baik. Semangattt yaaaa! 🙌✨<br><br>
+            <strong>Salam hangat, Elyusuf Benyamin.</strong>
+        </div>
+    </div>
+
+    <!-- MODAL PILIHAN INSTAGRAM -->
+    <div class="modal-overlay" id="igModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-modal" onclick="closeModal(event)"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="modal-title">Pilih Akun Instagram</h3>
+            <div class="links-container">
+                <a href="https://www.instagram.com/eyb_22_whiteside?igsh=Nml0NnZzdDJxbnFp" target="_blank" class="link-item">
+                    <i class="fa-brands fa-instagram" style="color: #ec4899;"></i> @eyb_22_whiteside
+                </a>
+                <a href="https://www.instagram.com/eybotherside_?igsh=MW9rbGFwd3BxNDNtYQ==" target="_blank" class="link-item">
+                    <i class="fa-brands fa-instagram" style="color: #ec4899;"></i> @eybotherside_
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. FITUR DARK MODE ---
+        const themeBtn = document.getElementById('theme-btn');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        
+        // Cek tema saat web dibuka
+        if (currentTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeBtn.innerText = '🌙';
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeBtn.innerText = '☀️';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeBtn.innerText = '🌙';
+            }
+        }
+
+        // --- 2. FITUR MODAL INSTAGRAM ---
+        const modal = document.getElementById('igModal');
+
+        function openModal() {
+            modal.classList.add('active');
+        }
+
+        function closeModal(e) {
+            modal.classList.remove('active');
+        }
+
+        // --- 3. FITUR IMPACTFUL (BAGIKAN PROFIL) ---
+        function shareProfile() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Profil Elyusuf Benyamin',
+                    text: 'Halo! Yuk mampir ke profil digital aku untuk saling terhubung.',
+                    url: window.location.href
+                }).catch((error) => console.log('Error sharing', error));
+            } else {
+                // Fallback jika browser tidak support Web Share API
+                navigator.clipboard.writeText(window.location.href);
+                alert('Link profil berhasil disalin ke clipboard!');
+            }
+        }
+    </script>
+</body>
+</html>
