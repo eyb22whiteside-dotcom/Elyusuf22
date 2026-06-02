@@ -12,6 +12,10 @@
     <!-- SweetAlert2 untuk Notifikasi Pop-up yang Elegan -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- FIREBASE SDK CLOUD (V8 Compat agar berjalan sempurna di satu file) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         /* =========================================
            VARIABEL WARNA & TEMA (AESTHETIC)
@@ -76,239 +80,159 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* FOTO PROFIL (Opsional, memberi kesan estetik) */
+        /* FOTO PROFIL */
         .profile-img-container {
-            width: 100px;
-            height: 100px;
+            width: 110px;
+            height: 110px;
             margin: 0 auto 20px;
-            background: linear-gradient(135deg, var(--accent), #3b82f6);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
-            font-size: 2.5rem;
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+            border: 4px solid var(--bg-card);
+            padding: 2px;
+            background: linear-gradient(135deg, var(--accent), #3b82f6);
+        }
+        .profile-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid var(--bg-card);
         }
 
-        /* TOMBOL TEMA */
+        /* TOMBOL TEMA & ADMIN */
         .theme-toggle {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            background: var(--btn-bg);
-            border: 1px solid var(--btn-border);
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: var(--text-primary);
-            transition: all 0.3s;
-            display: flex; justify-content: center; align-items: center;
+            position: absolute; top: 25px; right: 25px;
+            background: var(--btn-bg); border: 1px solid var(--btn-border);
+            width: 40px; height: 40px; border-radius: 50%;
+            font-size: 1.2rem; cursor: pointer; color: var(--text-primary);
+            transition: all 0.3s; display: flex; justify-content: center; align-items: center;
         }
         .theme-toggle:hover { transform: rotate(15deg) scale(1.1); }
 
+        .admin-toggle {
+            position: absolute; top: 75px; right: 30px;
+            background: transparent; border: none;
+            font-size: 1rem; cursor: pointer; color: var(--text-secondary);
+            transition: all 0.3s; opacity: 0.3;
+        }
+        .admin-toggle:hover { opacity: 1; color: var(--accent); transform: scale(1.1); }
+
         /* TEKS PROFIL */
         .profile-title {
-            font-size: 1.6rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 15px;
+            font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+        .profile-desc {
+            font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7;
+            margin-bottom: 30px; font-weight: 500; transition: all 0.2s;
         }
         
-        .profile-desc {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            line-height: 1.7;
-            margin-bottom: 30px;
-            font-weight: 500;
+        /* CSS KHUSUS SAAT MODE ADMIN AKTIF */
+        .admin-mode .editable-text {
+            border: 1px dashed #f59e0b;
+            padding: 5px; border-radius: 8px; cursor: pointer;
+            background: rgba(245, 158, 11, 0.1);
         }
+        .admin-mode .editable-text:hover { background: rgba(245, 158, 11, 0.2); }
 
-        /* TOMBOL FEEDBACK (AKSEN UTAMA) */
+        /* TOMBOL FEEDBACK & LINKS */
         .btn-main {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
+            display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%;
             background: linear-gradient(135deg, var(--accent), #047857);
-            color: #ffffff;
-            text-decoration: none;
-            padding: 16px;
-            border-radius: 16px;
-            font-weight: 700;
-            font-size: 1rem;
-            transition: all 0.3s;
-            margin-bottom: 30px;
-            border: none;
-            cursor: pointer;
+            color: #ffffff; text-decoration: none; padding: 16px; border-radius: 16px;
+            font-weight: 700; font-size: 1rem; transition: all 0.3s; margin-bottom: 30px; border: none; cursor: pointer;
             box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);
         }
         .btn-main:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(16, 185, 129, 0.5); }
 
-        /* DAFTAR LINK */
-        .links-container {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
+        .links-container { display: flex; flex-direction: column; gap: 14px; }
         .link-item {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            width: 100%;
-            background-color: var(--btn-bg);
-            color: var(--text-primary);
-            text-decoration: none;
-            padding: 16px;
-            border-radius: 16px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            border: 1px solid var(--btn-border);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            box-shadow: var(--shadow-btn);
+            display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;
+            background-color: var(--btn-bg); color: var(--text-primary); text-decoration: none;
+            padding: 16px; border-radius: 16px; font-weight: 600; font-size: 0.95rem;
+            border: 1px solid var(--btn-border); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer; box-shadow: var(--shadow-btn);
         }
-        .link-item:hover {
-            background-color: var(--btn-hover);
-            transform: translateY(-3px);
-            border-color: var(--accent);
-        }
+        .link-item:hover { background-color: var(--btn-hover); transform: translateY(-3px); border-color: var(--accent); }
         .link-item i { font-size: 1.3rem; }
 
         /* FOOTER & SHARE */
-        .action-footer {
-            margin-top: 35px;
-            padding-top: 20px;
-            border-top: 1px solid var(--btn-border);
-        }
-        
+        .action-footer { margin-top: 35px; padding-top: 20px; border-top: 1px solid var(--btn-border); }
         .share-btn {
-            background-color: transparent;
-            border: 2px dashed var(--btn-border);
-            color: var(--text-primary);
-            padding: 12px 20px;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            background-color: transparent; border: 2px dashed var(--btn-border);
+            color: var(--text-primary); padding: 12px 20px; border-radius: 50px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 8px;
         }
-        .share-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background-color: rgba(16, 185, 129, 0.05);
-        }
+        .share-btn:hover { border-color: var(--accent); color: var(--accent); background-color: rgba(16, 185, 129, 0.05); }
+        .footer-text { margin-top: 25px; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; }
 
-        .footer-text {
-            margin-top: 25px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* =========================================
-           MODAL INSTAGRAM & KUIS (AESTHETIC)
-           ========================================= */
+        /* MODAL UMUM */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(8px);
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px);
             display: flex; justify-content: center; align-items: center;
-            opacity: 0; visibility: hidden;
-            transition: all 0.4s ease;
-            z-index: 1000;
-            padding: 20px;
+            opacity: 0; visibility: hidden; transition: all 0.4s ease; z-index: 1000; padding: 20px;
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        
         .modal-content {
-            background-color: var(--bg-card);
-            width: 100%; max-width: 380px;
-            padding: 40px 30px;
-            border-radius: 24px;
-            text-align: center;
-            transform: translateY(30px) scale(0.95);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--bg-card); width: 100%; max-width: 380px;
+            padding: 40px 30px; border-radius: 24px; text-align: center;
+            transform: translateY(30px) scale(0.95); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 90vh; overflow-y: auto;
         }
         .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
-        
         .close-modal {
-            position: absolute; top: 20px; right: 20px;
-            background: var(--btn-bg); border: none; 
-            width: 32px; height: 32px; border-radius: 50%;
-            font-size: 1rem; color: var(--text-secondary); 
+            position: absolute; top: 20px; right: 20px; background: var(--btn-bg); border: none; 
+            width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; color: var(--text-secondary); 
             cursor: pointer; transition: 0.3s;
         }
         .close-modal:hover { background: #ef4444; color: white; }
-        
         .modal-title { font-weight: 800; margin-bottom: 25px; color: var(--text-primary); font-size: 1.3rem; }
 
-        .secret-trigger {
-            margin-top: 25px;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            text-decoration: underline;
-            text-decoration-style: dashed;
-            transition: color 0.3s;
-            opacity: 0.7;
-        }
-        .secret-trigger:hover { color: var(--accent); opacity: 1; }
-
         /* KUIS STYLING */
-        .quiz-text {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            color: var(--text-primary);
-            font-weight: 600;
-        }
+        .secret-trigger { margin-top: 25px; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer; text-decoration: underline; text-decoration-style: dashed; transition: color 0.3s; opacity: 0.7; }
+        .secret-trigger:hover { color: var(--accent); opacity: 1; }
+        .quiz-text { font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; color: var(--text-primary); font-weight: 600; }
         .quiz-btn {
-            display: block; width: 100%;
-            background-color: var(--btn-bg);
-            border: 1px solid var(--btn-border);
-            color: var(--text-primary);
-            padding: 14px; margin-bottom: 10px;
-            border-radius: 12px; font-weight: 600;
-            cursor: pointer; transition: 0.2s;
-            text-align: left; padding-left: 20px;
+            display: block; width: 100%; background-color: var(--btn-bg); border: 1px solid var(--btn-border);
+            color: var(--text-primary); padding: 14px; margin-bottom: 10px; border-radius: 12px; font-weight: 600;
+            cursor: pointer; transition: 0.2s; text-align: left; padding-left: 20px;
         }
         .quiz-btn:hover { background-color: var(--accent); color: white; border-color: var(--accent); }
-        
         .quiz-input {
-            width: 100%; padding: 14px;
-            border-radius: 12px;
-            border: 2px solid var(--btn-border);
-            background: var(--btn-bg);
-            color: var(--text-primary);
-            margin-bottom: 15px;
-            font-family: inherit; font-size: 0.95rem;
-            outline: none; transition: 0.3s;
+            width: 100%; padding: 14px; border-radius: 12px; border: 2px solid var(--btn-border);
+            background: var(--btn-bg); color: var(--text-primary); margin-bottom: 10px;
+            font-family: inherit; font-size: 0.95rem; outline: none; transition: 0.3s;
         }
         .quiz-input:focus { border-color: var(--accent); }
+        
+        /* ADMIN DASHBOARD LIST */
+        .answer-card { background: var(--btn-bg); border: 1px solid var(--btn-border); border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: left; }
+        .answer-card h5 { font-weight: 700; color: var(--text-primary); margin-bottom: 5px; font-size: 1rem; }
+        .answer-card p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px; line-height: 1.5; }
+        .answer-card small { color: #94a3b8; font-size: 0.75rem; }
     </style>
 </head>
-<body>
+<body id="mainBody">
 
     <div class="card">
         <!-- Tombol Toggle Tema -->
         <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Ubah Tema">☀️</button>
+        <!-- Tombol Rahasia Admin -->
+        <button class="admin-toggle" onclick="adminLogic()" title="Akses Rahasia"><i class="fa-solid fa-user-shield"></i></button>
 
         <div class="profile-img-container">
-            <i class="fa-solid fa-user-astronaut"></i>
+            <img src="https://i.postimg.cc/cCZ5sQHy/IMG-20260601-WA0020.jpg" alt="Foto Elyusuf">
         </div>
 
-        <h1 class="profile-title">Elyusuf Benyamin</h1>
+        <h1 class="profile-title" id="webTitle" onclick="editTeksRealtime('webTitle', 'Nama Profil')">Elyusuf Benyamin</h1>
         
-        <p class="profile-desc">
+        <p class="profile-desc" id="webDesc" onclick="editTeksRealtime('webDesc', 'Teks Deskripsi')">
             Halo Semua! Salam Kenal 👋<br><br>
             Website ini sengaja aku buat sebagai ruang digital untuk kita saling terhubung. Buat teman-teman yang belum kenal dekat, yuk kita kenalan lebih jauh! Dan buat yang sudah kenal, kalian bisa kasih saran atau kritik agar kita bisa bertumbuh jadi lebih baik.
         </p>
@@ -323,28 +247,21 @@
             <a href="https://drive.google.com/drive/folders/1_vClAahGKN3O4kcliUv_spWdt-08fYEg?usp=drive_link" target="_blank" class="link-item">
                 <i class="fa-regular fa-folder-open" style="color: #6366f1;"></i> About me
             </a>
-
-            <!-- WA diubah menggunakan template chat otomatis -->
             <a href="https://wa.me/6281257061145?text=halo%20Suf" target="_blank" class="link-item">
                 <i class="fa-brands fa-whatsapp" style="color: #10b981;"></i> WhatsApp
             </a>
-
-            <!-- Tombol IG memicu Modal Dinamis -->
             <button onclick="openIgModal()" class="link-item">
                 <i class="fa-brands fa-instagram" style="color: #ec4899;"></i> Instagram
             </button>
-
             <a href="https://www.tiktok.com/@eyb.22?is_from_webapp=1&sender_device=pc" target="_blank" class="link-item">
                 <i class="fa-brands fa-tiktok" style="color: var(--text-primary);"></i> TikTok
             </a>
         </div>
 
         <div class="action-footer">
-            <!-- Share button di-fix logic JS-nya -->
             <button onclick="shareProfile()" class="share-btn">
                 <i class="fa-solid fa-share-nodes"></i> Bagikan Profil Ini
             </button>
-
             <div class="footer-text">
                 Terima kasih sudah berkunjung yaaa, semoga kita menjadi teman yang baik. Semangattt yaaaa! 🙌✨<br><br>
                 <strong>Salam hangat, Elyusuf Benyamin.</strong>
@@ -362,191 +279,200 @@
         </div>
     </div>
 
+    <!-- MODAL ADMIN DASHBOARD -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <button class="close-modal" onclick="closeAdminModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="modal-title text-warning"><i class="fa-solid fa-crown"></i> Admin Dashboard</h3>
+            <p class="quiz-text mb-4" style="font-size: 0.85rem;">Klik pada Teks Nama/Deskripsi di luar kotak ini untuk mengubah tulisan di web secara real-time. Di bawah ini adalah hasil jawaban esai kuis:</p>
+            <div id="admin-answers-list" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                <p class="text-secondary text-center"><i class="fa-solid fa-spinner fa-spin"></i> Memuat data...</p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        /* =========================================
-           1. FITUR DARK MODE
-           ========================================= */
-        const themeBtn = document.getElementById('theme-btn');
-        const currentTheme = localStorage.getItem('theme') || 'light';
-        
-        if (currentTheme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-        } else {
-            themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
-        }
+        // ==========================================
+        // 1. INJEKSI FIREBASE REALTIME CLOUD
+        // ==========================================
+        const firebaseConfig = {
+          apiKey: "AIzaSyDZW_sfPOjEEqqN048adgC5H_WI4O5Sxiw",
+          authDomain: "elyusuf22-552b5.firebaseapp.com",
+          databaseURL: "https://elyusuf22-552b5-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "elyusuf22-552b5",
+          storageBucket: "elyusuf22-552b5.firebasestorage.app",
+          messagingSenderId: "114696499161",
+          appId: "1:114696499161:web:6b7c6788584b1ddd5373c8"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        function toggleTheme() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            if (isDark) {
-                document.documentElement.removeAttribute('data-theme');
-                localStorage.setItem('theme', 'light');
-                themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-                themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+        // Listener Real-time Teks Profil
+        db.ref('web_content').on('value', snap => {
+            const data = snap.val();
+            if(data) {
+                if(data.webTitle) document.getElementById('webTitle').innerText = data.webTitle;
+                if(data.webDesc) document.getElementById('webDesc').innerHTML = data.webDesc;
+            }
+        });
+
+        // ==========================================
+        // 2. FITUR ADMIN (LOGIN, EDIT TEKS, CEK JAWABAN)
+        // ==========================================
+        let isAdminActive = false;
+
+        async function adminLogic() {
+            if (isAdminActive) {
+                bukaAdminDashboard(); // Kalau sudah login, langsung buka kotak hasil kuis
+                return;
+            }
+            const { value: formValues } = await Swal.fire({
+                title: 'Otorisasi Keamanan',
+                html: '<input id="swal-u" class="swal2-input" placeholder="Username / ID">' +
+                      '<input id="swal-p" type="password" class="swal2-input" placeholder="Password Rahasia">',
+                preConfirm: () => [document.getElementById('swal-u').value, document.getElementById('swal-p').value]
+            });
+
+            if (formValues && formValues[0] === 'eyb22' && formValues[1] === 'DEVIONITAMENEL1') {
+                isAdminActive = true;
+                document.getElementById('mainBody').classList.add('admin-mode');
+                document.getElementById('webTitle').classList.add('editable-text');
+                document.getElementById('webDesc').classList.add('editable-text');
+                
+                Swal.fire({icon: 'success', title: 'Akses Diterima', text: 'Mode Administrator Aktif. Anda dapat menekan Teks di web untuk mengubahnya.', timer: 3000});
+                setTimeout(bukaAdminDashboard, 1500);
+            } else if (formValues) {
+                Swal.fire('Akses Ditolak', 'Kredensial salah!', 'error');
             }
         }
 
-        /* =========================================
-           2. FITUR SHARE DENGAN FALLBACK SWEETALERT
-           ========================================= */
-        function shareProfile() {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Profil Elyusuf Benyamin',
-                    text: 'Halo! Yuk mampir ke profil digital aku untuk saling terhubung.',
-                    url: window.location.href
-                }).catch((error) => {
-                    console.log('User membatalkan share');
-                });
-            } else {
-                // Fallback jika browser (terutama di laptop) tidak support Web Share API
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                    Swal.fire({
-                        title: 'Berhasil!',
-                        text: 'Link profil telah disalin ke clipboard.',
-                        icon: 'success',
-                        confirmButtonColor: '#10b981',
-                        confirmButtonText: 'Tutup'
-                    });
-                });
+        async function editTeksRealtime(elementId, labelText) {
+            if (!isAdminActive) return; // Jika bukan admin, klik tidak akan berefek apa-apa
+            const el = document.getElementById(elementId);
+            const { value: text } = await Swal.fire({
+                title: `Edit ${labelText}`,
+                input: elementId === 'webTitle' ? 'text' : 'textarea',
+                inputValue: el.innerText.trim(),
+                showCancelButton: true,
+                confirmButtonText: 'Simpan ke Cloud'
+            });
+            if (text) {
+                let htmlText = elementId === 'webDesc' ? text.replace(/\n/g, '<br>') : text;
+                db.ref('web_content/' + elementId).set(htmlText);
+                Swal.fire('Tersimpan!', 'Perubahan telah disinkronkan ke semua pengguna.', 'success');
             }
         }
 
-        /* =========================================
-           3. FITUR KUIS RAHASIA INSTAGRAM
-           ========================================= */
+        function bukaAdminDashboard() {
+            document.getElementById('adminModal').classList.add('active');
+            const listContainer = document.getElementById('admin-answers-list');
+            
+            // Ambil data jawaban esai dari Firebase
+            db.ref('quiz_answers').once('value').then(snap => {
+                if (!snap.exists()) {
+                    listContainer.innerHTML = '<p class="text-secondary mt-3">Belum ada teman yang menjawab kuis esai.</p>';
+                    return;
+                }
+                const answers = [];
+                snap.forEach(child => { answers.push(child.val()); });
+                answers.reverse(); // Yang terbaru di atas
+                
+                listContainer.innerHTML = answers.map(ans => `
+                    <div class="answer-card">
+                        <h5><i class="fa-regular fa-user"></i> ${ans.nama}</h5>
+                        <p><strong>Jawaban:</strong> "${ans.jawaban}"</p>
+                        <small><i class="fa-regular fa-clock"></i> ${ans.waktu}</small>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function closeAdminModal() { document.getElementById('adminModal').classList.remove('active'); }
+
+        // ==========================================
+        // 3. FITUR KUIS & INSTAGRAM MODAL
+        // ==========================================
         const modal = document.getElementById('igModal');
         const modalBody = document.getElementById('modal-body');
-        let mistakes = 0; // Kesalahan maksimal 1 kali
-        let isLocked = false;
+        let mistakes = 0; let isLocked = false;
 
         function openIgModal() {
             modal.classList.add('active');
-            // Jika sudah terkunci, langsung tampilkan layar gagal
-            if (isLocked) {
-                renderState('locked');
-            } else {
-                renderState('initial');
-            }
+            if (isLocked) renderState('locked'); else renderState('initial');
         }
+        function closeIgModal() { modal.classList.remove('active'); }
 
-        function closeIgModal() {
-            modal.classList.remove('active');
-        }
-
-        // Handle Penilaian Kuis
         function handleAnswer(isCorrect, nextState) {
-            if (isCorrect) {
-                renderState(nextState);
-            } else {
+            if (isCorrect) { renderState(nextState); } 
+            else {
                 mistakes++;
                 if (mistakes === 1) {
-                    Swal.fire({
-                        title: 'Salah!',
-                        text: 'Ayo pikir lagi. Kamu punya 1 kali kesempatan terakhir!',
-                        icon: 'warning',
-                        confirmButtonColor: '#f59e0b',
-                        confirmButtonText: 'Coba Lagi'
-                    });
+                    Swal.fire({ title: 'Salah!', text: 'Ayo pikir lagi. Kamu punya 1 kali kesempatan terakhir!', icon: 'warning', confirmButtonColor: '#f59e0b' });
                 } else {
-                    isLocked = true;
-                    renderState('locked');
-                    Swal.fire({
-                        title: 'Gagal!',
-                        text: 'Kesempatan habis. Kamu belum cukup dekat dengan Yusuf!',
-                        icon: 'error',
-                        confirmButtonColor: '#ef4444',
-                        confirmButtonText: 'Tutup'
-                    });
+                    isLocked = true; renderState('locked');
+                    Swal.fire({ title: 'Gagal!', text: 'Kesempatan habis. Kamu belum cukup dekat dengan Yusuf!', icon: 'error', confirmButtonColor: '#ef4444' });
                 }
             }
         }
 
         function submitEssay() {
-            const input = document.getElementById('q3-input').value.trim();
-            if (input.length > 2) {
-                // Apa pun jawabannya, jika diisi dianggap benar
+            const nama = document.getElementById('q3-nama').value.trim();
+            const jawaban = document.getElementById('q3-jawaban').value.trim();
+            
+            if (nama.length > 1 && jawaban.length > 2) {
+                // Menyimpan jawaban ke Firebase Cloud agar bisa dibaca Admin
+                db.ref('quiz_answers').push({
+                    nama: nama,
+                    jawaban: jawaban,
+                    waktu: new Date().toLocaleString('id-ID')
+                });
                 renderState('success');
             } else {
-                Swal.fire('Isi dulu dong!', 'Tuliskan minimal 3 kata tentang Yusuf.', 'info');
+                Swal.fire('Lengkapi Data!', 'Mohon isi Nama dan Jawabanmu dengan benar ya.', 'info');
             }
         }
 
-        // Render Layar Kuis
         function renderState(state) {
             let html = '';
-            
             switch(state) {
                 case 'initial':
-                    html = `
-                        <h3 class="modal-title">Instagram</h3>
-                        <a href="https://www.instagram.com/eyb_22_whiteside?igsh=Nml0NnZzdDJxbnFp" target="_blank" class="btn-main" style="margin-bottom: 10px;">
-                            <i class="fa-brands fa-instagram"></i> @eyb_22_whiteside
-                        </a>
-                        <p class="secret-trigger" onclick="renderState('intro')">apakah anda teman dekat yusuf?</p>
-                    `;
-                    break;
+                    html = `<h3 class="modal-title">Instagram</h3><a href="https://www.instagram.com/eyb_22_whiteside?igsh=Nml0NnZzdDJxbnFp" target="_blank" class="btn-main" style="margin-bottom: 10px;"><i class="fa-brands fa-instagram"></i> @eyb_22_whiteside</a><p class="secret-trigger" onclick="renderState('intro')">apakah anda teman dekat yusuf?</p>`; break;
                 case 'intro':
-                    html = `
-                        <h3 class="modal-title">Secret Test 🤫</h3>
-                        <p class="quiz-text">Haii gaiss jadi ada beberapa test untuk teman-teman yang merasa sudah dekat dengan aku nihhh.<br><br>Jawab yang benar yaaa!</p>
-                        <button class="btn-main" onclick="renderState('q1')">Mulai Test</button>
-                    `;
-                    break;
+                    html = `<h3 class="modal-title">Secret Test 🤫</h3><p class="quiz-text">Haii gaiss jadi ada beberapa test untuk teman-teman yang merasa sudah dekat dengan aku nihhh.<br><br>Jawab yang benar yaaa!</p><button class="btn-main" onclick="renderState('q1')">Mulai Test</button>`; break;
                 case 'q1':
-                    html = `
-                        <h3 class="modal-title">Pertanyaan 1/3</h3>
-                        <p class="quiz-text">Siapa nama panggilan Elyusuf di kampus?</p>
-                        <button class="quiz-btn" onclick="handleAnswer(false, 'q2')">a. usyup</button>
-                        <button class="quiz-btn" onclick="handleAnswer(true, 'q2')">b. ucup</button>
-                        <button class="quiz-btn" onclick="handleAnswer(false, 'q2')">c. el</button>
-                        <button class="quiz-btn" onclick="handleAnswer(false, 'q2')">d. Yusuf</button>
-                    `;
-                    break;
+                    html = `<h3 class="modal-title">Pertanyaan 1/3</h3><p class="quiz-text">Siapa nama panggilan Elyusuf di kampus?</p><button class="quiz-btn" onclick="handleAnswer(false, 'q2')">a. usyup</button><button class="quiz-btn" onclick="handleAnswer(true, 'q2')">b. ucup</button><button class="quiz-btn" onclick="handleAnswer(false, 'q2')">c. el</button><button class="quiz-btn" onclick="handleAnswer(false, 'q2')">d. Yusuf</button>`; break;
                 case 'q2':
-                    html = `
-                        <h3 class="modal-title">Pertanyaan 2/3</h3>
-                        <p class="quiz-text">Apa kata yang paling sering Elyusuf ucapkan?</p>
-                        <button class="quiz-btn" onclick="handleAnswer(true, 'q3')">a. semangat, luarbiasa, keren</button>
-                        <button class="quiz-btn" onclick="handleAnswer(false, 'q3')">b. mantap, nice, hebat</button>
-                        <button class="quiz-btn" onclick="handleAnswer(false, 'q3')">c. sip, acc, luarbiasa</button>
-                        <button class="quiz-btn" onclick="handleAnswer(false, 'q3')">d. selamat, kita spin, bagus</button>
-                    `;
-                    break;
+                    html = `<h3 class="modal-title">Pertanyaan 2/3</h3><p class="quiz-text">Apa kata yang paling sering Elyusuf ucapkan?</p><button class="quiz-btn" onclick="handleAnswer(true, 'q3')">a. semangat, luarbiasa, keren</button><button class="quiz-btn" onclick="handleAnswer(false, 'q3')">b. mantap, nice, hebat</button><button class="quiz-btn" onclick="handleAnswer(false, 'q3')">c. sip, acc, luarbiasa</button><button class="quiz-btn" onclick="handleAnswer(false, 'q3')">d. selamat, kita spin, bagus</button>`; break;
                 case 'q3':
-                    html = `
-                        <h3 class="modal-title">Pertanyaan Terakhir!</h3>
-                        <p class="quiz-text">Tuliskan 3 kata yang menjelaskan Elyusuf?</p>
-                        <input type="text" id="q3-input" class="quiz-input" placeholder="Ketik jawabanmu di sini..." autocomplete="off">
-                        <button class="btn-main" onclick="submitEssay()">Kirim Jawaban</button>
-                    `;
-                    break;
+                    html = `<h3 class="modal-title">Pertanyaan Terakhir!</h3><p class="quiz-text mb-3">Tuliskan 3 kata yang menjelaskan Elyusuf?</p>
+                            <input type="text" id="q3-nama" class="quiz-input" placeholder="Masukkan Namamu..." autocomplete="off">
+                            <input type="text" id="q3-jawaban" class="quiz-input" placeholder="Jawaban 3 kata..." autocomplete="off">
+                            <button class="btn-main mt-2" onclick="submitEssay()">Kirim Jawaban</button>`; break;
                 case 'success':
-                    html = `
-                        <h3 class="modal-title" style="color: var(--accent);">You Passed! 🎉</h3>
-                        <p class="quiz-text" style="font-size: 0.85rem;">Ternyata kamu beneran temen deket aku! Ini dia akses ke dua akun Instagramku:</p>
-                        <div class="links-container">
-                            <a href="https://www.instagram.com/eyb_22_whiteside?igsh=Nml0NnZzdDJxbnFp" target="_blank" class="link-item">
-                                <i class="fa-brands fa-instagram" style="color: #ec4899;"></i> @eyb_22_whiteside
-                            </a>
-                            <a href="https://www.instagram.com/eybotherside_?igsh=MW9rbGFwd3BxNDNtYQ==" target="_blank" class="link-item">
-                                <i class="fa-solid fa-lock-open" style="color: #ec4899;"></i> @eybotherside_
-                            </a>
-                        </div>
-                    `;
-                    break;
+                    html = `<h3 class="modal-title" style="color: var(--accent);">You Passed! 🎉</h3><p class="quiz-text" style="font-size: 0.85rem;">Ternyata kamu beneran temen deket aku! Ini dia akses ke dua akun Instagramku:</p><div class="links-container"><a href="https://www.instagram.com/eyb_22_whiteside?igsh=Nml0NnZzdDJxbnFp" target="_blank" class="link-item"><i class="fa-brands fa-instagram" style="color: #ec4899;"></i> @eyb_22_whiteside</a><a href="https://www.instagram.com/eybotherside_?igsh=MW9rbGFwd3BxNDNtYQ==" target="_blank" class="link-item"><i class="fa-solid fa-lock-open" style="color: #ec4899;"></i> @eybotherside_</a></div>`; break;
                 case 'locked':
-                    html = `
-                        <h3 class="modal-title" style="color: #ef4444;">Akses Dikunci 🔒</h3>
-                        <p class="quiz-text">Maaf, jawabanmu salah lebih dari 1 kali. Sepertinya kita harus lebih banyak ngobrol lagi supaya kamu makin kenal sama aku!</p>
-                    `;
-                    break;
+                    html = `<h3 class="modal-title" style="color: #ef4444;">Akses Dikunci 🔒</h3><p class="quiz-text">Maaf, jawabanmu salah lebih dari 1 kali. Sepertinya kita harus lebih banyak ngobrol lagi supaya kamu makin kenal sama aku!</p>`; break;
             }
-            
             modalBody.innerHTML = html;
+        }
+
+        // ==========================================
+        // 4. FITUR DARK MODE & SHARE BUTTON
+        // ==========================================
+        const themeBtn = document.getElementById('theme-btn');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        if (currentTheme === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>'; } 
+        else { themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>'; }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) { document.documentElement.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>'; } 
+            else { document.documentElement.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>'; }
+        }
+
+        function shareProfile() {
+            if (navigator.share) { navigator.share({ title: 'Profil Elyusuf Benyamin', text: 'Halo! Yuk mampir ke profil digital aku untuk saling terhubung.', url: window.location.href }).catch(err => {}); } 
+            else { navigator.clipboard.writeText(window.location.href).then(() => { Swal.fire({ title: 'Berhasil!', text: 'Link profil telah disalin ke clipboard.', icon: 'success', confirmButtonColor: '#10b981', confirmButtonText: 'Tutup' }); }); }
         }
     </script>
 </body>
